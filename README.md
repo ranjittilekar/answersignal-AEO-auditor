@@ -2,8 +2,6 @@
 
 **Bridging the gap between traditional SEO and the era of AI-driven discovery.**
 
-![AnswerSignal Header](path/to/header-image.png)
-
 ---
 
 ## 🎯 The Vision: From Search Results to Answers
