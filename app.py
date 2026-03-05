@@ -67,6 +67,19 @@ def extract_aeo_signals(url):
     h1_tags = [h1.get_text(strip=True) for h1 in soup.find_all('h1')]
     h2_tags = [h2.get_text(strip=True) for h2 in soup.find_all('h2')]
     
+    # Extract Additional Signals
+    canonical_tag = soup.find('link', rel='canonical')
+    canonical_url = canonical_tag.get('href') if canonical_tag else None
+    
+    og_title_tag = soup.find('meta', property='og:title')
+    og_title = og_title_tag.get('content') if og_title_tag else None
+    
+    og_desc_tag = soup.find('meta', property='og:description')
+    og_desc = og_desc_tag.get('content') if og_desc_tag else None
+    
+    text_content = soup.get_text(separator=' ', strip=True)
+    word_count = len(text_content.split())
+    
     # Extract JSON-LD Schema
     schema_data = []
     schemas = soup.find_all('script', type='application/ld+json')
@@ -92,9 +105,13 @@ def extract_aeo_signals(url):
         "h1_samples": h1_tags[:3],
         "h2_count": len(h2_tags),
         "json_ld_schemas_count": len(schema_data),
-        "schemas": schema_data[:2], # Send up to 2 schemas to AI to save context
+        "schemas": schema_data[:2], # Send up to 2 schemas to AI to save token context limits
         "bot_friendly": is_bot_friendly,
-        "robots_directive": robots_content
+        "robots_directive": robots_content,
+        "canonical_url": canonical_url,
+        "og_title": og_title,
+        "og_description": og_desc,
+        "word_count": word_count
     }
 
 def analyze_with_ai(api_key, page_data):
@@ -135,12 +152,15 @@ def analyze_with_ai(api_key, page_data):
         return {"error": f"AI Audit failed: {str(e)}"}
 
 def generate_signal_map(data):
-    """Generate signal map for basic visual dashboard."""
+    """Generate signal map boolean values."""
     signals = {
         "Page Title": bool(data.get('title')),
         "Meta Description": bool(data.get('meta_description')),
+        "Canonical URL": bool(data.get('canonical_url')),
         "H1 Header": data.get('h1_count', 0) > 0,
         "H2 Headers": data.get('h2_count', 0) > 0,
+        "Open Graph Tags": bool(data.get('og_title') or data.get('og_description')),
+        "Substantive Content (>300 words)": data.get('word_count', 0) > 300,
         "JSON-LD Schema": data.get('json_ld_schemas_count', 0) > 0,
         "Bot Friendly (Indexable)": data.get('bot_friendly', False)
     }
@@ -231,8 +251,12 @@ if st.button("Run Audit", type="primary"):
         audit_comp = None
         if compare_mode:
             data_comp = extract_aeo_signals(competitor_url)
-            if "error" not in data_comp:
+            if "error" in data_comp:
+                st.warning(f"Could not fetch competitor URL ({competitor_url}). The site might be blocking bots. Details: {data_comp['error']}")
+            else:
                 audit_comp = analyze_with_ai(api_key, data_comp)
+                if "error" in audit_comp:
+                    st.warning(f"Failed to analyze competitor URL: {audit_comp['error']}")
         
         st.success("Audit Complete!")
         

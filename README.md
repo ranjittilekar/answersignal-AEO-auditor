@@ -19,6 +19,7 @@ We are experiencing a fundamental shift in how users find information. The era o
 AnswerSignal acts as a Discovery Health Audit for any public URL, unpacking how robots perceive your content.
 
 *   **💯 AEO Citability Scoring:** A comprehensive 0-100 metric based on entity clarity, semantic richness, and technical bot-friendliness.
+*   **📡 Expanded Signal Map:** Checks for critical AEO metadata including Canonical URLs, Open Graph Tags, and Substantive Content.
 *   **🔎 JSON-LD Schema Audit:** Automatically extracts and validates your structured data to ensure it's robust enough for AI reasoning.
 *   **🥊 Competitive Benchmarking:** Side-by-side URL comparison mode to instantly see how your signaling stacks up against a competitor's.
 *   **📋 PM Action Plan:** Generates 3 high-impact, Jira-ready recommendations directly from Gemini's analysis.
@@ -64,7 +65,7 @@ cd AnswerSignal
 
 **2. Install requirements**
 ```bash
-pip install streamlit requests beautifulsoup4 google-generativeai pandas
+pip install -r requirements.txt
 ```
 
 **3. Run the application**
